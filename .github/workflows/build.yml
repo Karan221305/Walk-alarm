@@ -17,19 +17,19 @@ jobs:
 
       - name: Configure Android SDK and Kotlin Version
         run: |
-          # Force set stable Kotlin version in settings.gradle (Modern Flutter way)
+          # Modern Flutter template uses settings.gradle for Kotlin versioning
           if [ -f android/settings.gradle ]; then
-            sed -i "s/id \"org.jetbrains.kotlin.android\" version .*/id \"org.jetbrains.kotlin.android\" version \"1.9.22\" apply false/g" android/settings.gradle || true
+            sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.22" apply false/g' android/settings.gradle || true
           fi
 
-          # Update app level SDK settings to version 35
+          # Standardize SDK versions to 34 for stability with plugins like pedometer
           if [ -f android/app/build.gradle ]; then
-            sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle || true
-            sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle || true
+            sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' android/app/build.gradle || true
+            sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' android/app/build.gradle || true
             sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle || true
           fi
           
-          # Fix local properties backup
+          # Force set local properties backup
           sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/local.properties || true
 
       - name: Fix missing app folders and files
@@ -59,3 +59,4 @@ jobs:
         with:
           name: step-alarm-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
