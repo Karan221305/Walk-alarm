@@ -13,13 +13,17 @@ jobs:
       - name: Recreate missing android files
         run: flutter create . --project-name=walk_alarm --platforms=android
 
-      - name: Fix Android SDK Versions
+      - name: Fix Android and Kotlin SDK Versions
         run: |
+          # SDK Versions Fix
           sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle || true
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle || true
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle || true
-          # Backup fix for newer flutter templates
           sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/local.properties || true
+          
+          # Kotlin Version Fix
+          sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/g" android/build.gradle || true
+          sed -i "s/kotlin_version = .*/kotlin_version = '1.9.22'/g" android/build.gradle || true
 
       - name: Fix missing folders and files
         run: |
@@ -48,3 +52,4 @@ jobs:
         with:
           name: step-alarm-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
