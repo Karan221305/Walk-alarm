@@ -17,19 +17,15 @@ jobs:
 
       - name: Configure Android SDK and Kotlin Version
         run: |
-          # Configure Kotlin in modern settings.gradle template
           if [ -f android/settings.gradle ]; then
             sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.22" apply false/g' android/settings.gradle || true
           fi
 
-          # Standardize SDK versions to 34 for stability
           if [ -f android/app/build.gradle ]; then
             sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' android/app/build.gradle || true
             sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' android/app/build.gradle || true
             sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle || true
           fi
-          
-          # Force set local properties backup
           sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/local.properties || true
 
       - name: Fix missing app folders and files
@@ -48,12 +44,13 @@ jobs:
           echo "  }" >> lib/views/home_view.dart
           echo "}" >> lib/views/home_view.dart
 
-      - name: Force Update Pedometer Plugin Dependency
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Hard Patch Pedometer Type Mismatch
         run: |
-          # Override the broken pedometer version directly using flutter pub pub
-          flutter pub add pedometer:4.0.1 --dry-run || true
-          # Force resolution strategy via flutter commands
-          flutter pub get
+          # Ekdum sateek tarike se plugin ki error file ko cache ke andar hi badal dena
+          find ~/.pub-cache/hosted -name "PedometerPlugin.kt" -exec sed -i 's/arguments as String/arguments?.toString() ?: ""/g' {} + || true
 
       - name: Build APK
         run: flutter build apk --release
