@@ -42,7 +42,7 @@ jobs:
           echo "import 'package:flutter/material.dart';" > lib/views/home_view.dart
           echo "class HomeView extends StatelessWidget {" >> lib/views/home_view.dart
           echo "  const HomeView({super.key});" >> lib/views/home_view.dart
-          echo "  @override" >> id "lib/views/home_view.dart"
+          echo "  @override" >> lib/views/home_view.dart
           echo "  Widget build(BuildContext context) {" >> lib/views/home_view.dart
           echo "    return const Scaffold(body: Center(child: Text('Home')));" >> lib/views/home_view.dart
           echo "  }" >> lib/views/home_view.dart
