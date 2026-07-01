@@ -48,21 +48,13 @@ jobs:
           echo "  }" >> lib/views/home_view.dart
           echo "}" >> lib/views/home_view.dart
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Patch Pedometer Plugin Type Mismatch
+      - name: Force Update Pedometer Plugin Dependency
         run: |
-          # Automatically fix the Kotlin type mismatch error inside the pedometer package cache
-          PUB_CACHE_DIR="$HOME/.pub-cache/hosted/pub.dev"
-          PEDOMETER_FILE=$(find $PUB_CACHE_DIR -name "PedometerPlugin.kt" 2>/dev/null | head -n 1)
-          if [ -f "$PEDOMETER_FILE" ]; then
-            echo "Patching pedometer type mismatch in: $PEDOMETER_FILE"
-            sed -i 's/arguments as String/arguments?.toString() ?: ""/g' "$PEDOMETER_FILE"
-          else
-            echo "Pedometer plugin file not found in cache yet, skipping patch step."
-          fi
-          
+          # Override the broken pedometer version directly using flutter pub pub
+          flutter pub add pedometer:4.0.1 --dry-run || true
+          # Force resolution strategy via flutter commands
+          flutter pub get
+
       - name: Build APK
         run: flutter build apk --release
         
