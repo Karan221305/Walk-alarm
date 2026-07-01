@@ -13,17 +13,47 @@ jobs:
       - name: Recreate missing android files
         run: flutter create . --project-name=walk_alarm --platforms=android
 
-      - name: Fix Android and Kotlin SDK Versions
+      - name: Force Fix Android and Kotlin Configurations
         run: |
-          # SDK Versions Fix
+          # 1. New Kotlin and Gradle configuration
+          cat << 'EOF' > android/build.gradle
+          buildscript {
+              ext.kotlin_version = '1.9.22'
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.1'
+                  classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.buildDir = '../build'
+          subprojects {
+              project.buildDir = "${rootProject.buildDir}/${project.name}"
+          }
+          subprojects {
+              project.evaluationDependsOn(':app')
+          }
+          tasks.register("clean", Delete) {
+              delete rootProject.buildDir
+          }
+          EOF
+
+          # 2. Update gradle-wrapper to support Gradle 8
+          sed -i 's/gradle-.*-all.zip/gradle-8.5-all.zip/' android/gradle/wrapper/gradle-wrapper.properties || true
+
+          # 3. Update app level SDK settings
           sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle || true
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle || true
           sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle || true
           sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/local.properties || true
-          
-          # Kotlin Version Fix
-          sed -i "s/ext.kotlin_version = .*/ext.kotlin_version = '1.9.22'/g" android/build.gradle || true
-          sed -i "s/kotlin_version = .*/kotlin_version = '1.9.22'/g" android/build.gradle || true
 
       - name: Fix missing folders and files
         run: |
@@ -52,4 +82,3 @@ jobs:
         with:
           name: step-alarm-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
