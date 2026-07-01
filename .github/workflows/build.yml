@@ -17,12 +17,12 @@ jobs:
 
       - name: Configure Android SDK and Kotlin Version
         run: |
-          # Modern Flutter template uses settings.gradle for Kotlin versioning
+          # Configure Kotlin in modern settings.gradle template
           if [ -f android/settings.gradle ]; then
             sed -i 's/id "org.jetbrains.kotlin.android" version .*/id "org.jetbrains.kotlin.android" version "1.9.22" apply false/g' android/settings.gradle || true
           fi
 
-          # Standardize SDK versions to 34 for stability with plugins like pedometer
+          # Standardize SDK versions to 34 for stability
           if [ -f android/app/build.gradle ]; then
             sed -i 's/compileSdkVersion .*/compileSdkVersion 34/' android/app/build.gradle || true
             sed -i 's/targetSdkVersion .*/targetSdkVersion 34/' android/app/build.gradle || true
@@ -42,7 +42,7 @@ jobs:
           echo "import 'package:flutter/material.dart';" > lib/views/home_view.dart
           echo "class HomeView extends StatelessWidget {" >> lib/views/home_view.dart
           echo "  const HomeView({super.key});" >> lib/views/home_view.dart
-          echo "  @override" >> lib/views/home_view.dart
+          echo "  @override" >> id "lib/views/home_view.dart"
           echo "  Widget build(BuildContext context) {" >> lib/views/home_view.dart
           echo "    return const Scaffold(body: Center(child: Text('Home')));" >> lib/views/home_view.dart
           echo "  }" >> lib/views/home_view.dart
@@ -50,6 +50,18 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Patch Pedometer Plugin Type Mismatch
+        run: |
+          # Automatically fix the Kotlin type mismatch error inside the pedometer package cache
+          PUB_CACHE_DIR="$HOME/.pub-cache/hosted/pub.dev"
+          PEDOMETER_FILE=$(find $PUB_CACHE_DIR -name "PedometerPlugin.kt" 2>/dev/null | head -n 1)
+          if [ -f "$PEDOMETER_FILE" ]; then
+            echo "Patching pedometer type mismatch in: $PEDOMETER_FILE"
+            sed -i 's/arguments as String/arguments?.toString() ?: ""/g' "$PEDOMETER_FILE"
+          else
+            echo "Pedometer plugin file not found in cache yet, skipping patch step."
+          fi
           
       - name: Build APK
         run: flutter build apk --release
@@ -59,4 +71,3 @@ jobs:
         with:
           name: step-alarm-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-
