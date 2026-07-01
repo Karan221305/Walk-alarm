@@ -11,7 +11,7 @@ jobs:
           channel: 'stable'
       
       - name: Recreate missing android files
-        run: flutter create . --platforms=android
+        run: flutter create . --project-name=walk_alarm --platforms=android
 
       - name: Install dependencies
         run: flutter pub get
@@ -24,5 +24,6 @@ jobs:
         with:
           name: step-alarm-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
 
 
