@@ -13,16 +13,18 @@ jobs:
       - name: Recreate missing android files
         run: flutter create . --project-name=walk_alarm --platforms=android
 
-      - name: Fix Android SDK Version
+      - name: Fix Android SDK Versions
         run: |
           sed -i 's/compileSdkVersion .*/compileSdkVersion 35/' android/app/build.gradle || true
           sed -i 's/targetSdkVersion .*/targetSdkVersion 35/' android/app/build.gradle || true
+          sed -i 's/minSdkVersion .*/minSdkVersion 21/' android/app/build.gradle || true
+          # Backup fix for newer flutter templates
+          sed -i 's/minSdkVersion = .*/minSdkVersion = 21/' android/local.properties || true
 
       - name: Fix missing folders and files
         run: |
           mkdir -p lib/providers lib/views
           
-          # Creating correct dummy files
           echo "import 'package:flutter/foundation.dart';" > lib/providers/alarm_provider.dart
           echo "class AlarmProvider extends ChangeNotifier {}" >> lib/providers/alarm_provider.dart
           
